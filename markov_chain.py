@@ -16,9 +16,11 @@ from random import choices
 
 class MarkovChain():
     
-    def __init__(self, states, probs):
+    def __init__(self, states, probs, 
+                 drug_sim=False):
         self.states = np.array( states )
         self.probs = probs
+        self.drug_sim = drug_sim
         
         if len(self.states) != len(probs):
             print('Length of states and probabilities should be equal!')
@@ -55,7 +57,10 @@ class MarkovChain():
         ## Convert list to numpy array
         self.states_all = np.array( self.states_all )
         
-        print('Simulation has been completed! Ana has traveled to {} states, starting from {}'.format(self.N_trips, init_state))
+        if self.drug_sim:
+            print('Protein simulation has been completed')
+        else:
+            print('Simulation has been completed! Ana has traveled to {} cities, starting from {}'.format(self.N_trips, init_state))
         
         
     def live_plot(self, i):
@@ -77,7 +82,7 @@ class MarkovChain():
         self.ax.set_xticks( self.x, self.states, rotation=45, ha="right")
         # self.ax.set_xlabel('City', fontsize=14)
         self.ax.set_ylabel('Ratio of time spent', fontsize=14)
-        self.ax.set_title('Number of trips = {}'.format(i))
+        self.ax.set_title('T = {}'.format(i))
         self.fig.tight_layout()
         
 #         return self.ax
@@ -102,4 +107,60 @@ class MarkovChain():
         self.plot_simulation()
         
         plt.show()
+
+
+
+class ProteinMarkovChain(MarkovChain):
+    
+    def __init__(self, drug):
         
+        states = ['Good', 'Neutral', 'Diseased']
+        drug_number = drug[-1]
+        df = pd.read_excel('drug_{}_probabilities.xlsx'.format(drug_number), 
+                           header=0, 
+                           index_col=0
+                           )
+        probs = df.to_numpy()
+        
+        super( ProteinMarkovChain, self ).__init__(states, probs)
+
+
+    def run_model(self, init_state, time=100 ):
+        self.run_simulation(init_state, time)
+        
+        self.report_stats()
+        
+        
+    def report_stats(self):
+        ## Define blank array to measure number of jumps
+        self.num_jumps = np.zeros((len(self.states), len(self.states)))
+        
+        for i in range(len(self.states_all)-1):
+            from_point = np.where(self.states == self.states_all[i])
+            to_point = np.where(self.states == self.states_all[i+1])
+            self.num_jumps[ from_point, to_point ] += 1
+            
+        self.dataframe = pd.DataFrame(self.num_jumps.astype('int'), 
+                                      index=self.states, 
+                                      columns=self.states)
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
