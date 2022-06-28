@@ -116,7 +116,7 @@ class ProteinMarkovChain(MarkovChain):
         
         states = ['Good', 'Neutral', 'Diseased']
         drug_number = drug[-1]
-        df = pd.read_excel('drug_{}_probabilities.xlsx'.format(drug_number), 
+        df = pd.read_excel('probability_excel_sheets/drug_{}_probabilities.xlsx'.format(drug_number), 
                            header=0, 
                            index_col=0
                            )
