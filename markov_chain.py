@@ -139,10 +139,13 @@ class ProteinMarkovChain(MarkovChain):
             from_point = np.where(self.states == self.states_all[i])
             to_point = np.where(self.states == self.states_all[i+1])
             self.num_jumps[ from_point, to_point ] += 1
-            
-        self.dataframe = pd.DataFrame(self.num_jumps.astype('int'), 
+        
+        total_jumps = np.concatenate( (self.num_jumps, self.num_jumps.astype('int').sum(axis=1)[:, None]), axis=1)
+        total_cols = list(self.states)
+        total_cols.append('Total jumps')
+        self.dataframe = pd.DataFrame(total_jumps.astype('int'), 
                                       index=self.states, 
-                                      columns=self.states)
+                                      columns=total_cols)
         
 
 
